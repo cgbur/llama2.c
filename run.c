@@ -618,8 +618,15 @@ int main(int argc, char *argv[]) {
         size_t weights_size = file_size - sizeof(Config);
 
         // allocate memory for the weights, page aligned for best performance
-        data = (float*) aligned_alloc(sysconf(_SC_PAGESIZE), weights_size);
-        if (!data) { fprintf(stderr, "aligned_alloc failed!\n"); return 1; }
+        /* data = (float*) aligned_alloc(sysconf(_SC_PAGESIZE), weights_size); */
+        /* if (!data) { fprintf(stderr, "aligned_alloc failed!\n"); return 1; } */
+        /* data = (float*) malloc(weights_size); */
+        /* if (!data) { fprintf(stderr, "malloc failed!\n"); return 1; } */
+        // use posix_memalign 
+        if (posix_memalign((void**)&data, 4096, weights_size)) {
+            fprintf(stderr, "posix_memalign failed!\n");
+            return 1;
+        }
 
         // Read the weights into the allocated memory
         if (fread(data, 1, weights_size, file) != weights_size) {
